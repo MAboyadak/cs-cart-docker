@@ -19,7 +19,13 @@ RUN apt-get update && \
     apt-get clean
 
 RUN unzip ${CS_CART_ZIP} && \
-    rm ${CS_CART_ZIP}
+    rm ${CS_CART_ZIP} && \
+    chown -R www-data:www-data .
+
+# download the paytabs-addon
+RUN curl -SL https://github.com/paytabscom/paytabs-cscart/releases/download/3.1.2/paytabs-cscart.zip -o pt2-cscart.zip && \
+    unzip -d app/addons pt2-cscart.zip && \
+    rm pt2-cscart.zip
 
 # Enable SSL mode & HTTPS website
 RUN cd /etc/apache2/sites-available \
