@@ -1,0 +1,55 @@
+name: cs-cart-app
+
+services:
+
+  cs-cart:
+    container_name: cs-cart-app
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - 8000:80
+    volumes:
+      - ./src:/var/www/html:rw
+      - files:/var/www/html
+    depends_on:
+      mysql:
+        condition: service_healthy
+   
+  # mysql
+  mysql:
+    container_name: cs-cart-db
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: cs_cart_app
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+    ports:
+      - 8001:3306
+    volumes:
+      - db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysql -u root -proot -e 'show databases'"]
+      interval: 5s
+      timeout: 60s
+      retries: 5
+      start_period: 30s
+  
+   # phpmyadmin
+  phpmyadmin:
+    container_name: cs-cart-phpmyadmin
+    depends_on:
+      mysql:
+        condition: service_healthy
+    image: phpmyadmin
+    restart: always
+    ports:
+      - "8002:80"
+    environment:
+      PMA_HOST: mysql
+      MYSQL_ROOT_PASSWORD: root
+
+volumes:
+  files:
+  db:
